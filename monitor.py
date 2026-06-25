@@ -24,11 +24,11 @@ def extract_text(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "nav", "footer", "header"]):
         tag.decompose()
-    return " ".join(soup.get_text().split())
+    return " ".join(soup.get_text(separator=" ").split())
 
 
 def change_pct(old: str, new: str) -> float:
-    matcher = difflib.SequenceMatcher(None, old, new)
+    matcher = difflib.SequenceMatcher(None, old.split(), new.split(), autojunk=False)
     return round((1 - matcher.ratio()) * 100, 2)
 
 
@@ -82,9 +82,8 @@ def run():
     print(f"checking {len(urls)} due URL(s)")
 
     for row in urls:
-        uid, url, label, threshold = (
-            row["id"], row["url"], row["label"], row["threshold_pct"]
-        )
+        uid, url, label = row["id"], row["url"], row["label"]
+        threshold = row["threshold_pct"] or 0
         print(f"  {url}")
 
         content = fetch(url)
